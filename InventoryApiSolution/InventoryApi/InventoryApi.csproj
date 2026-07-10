@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>InventoryApi</RootNamespace>
+    <ProjectGuid>{9415F1BA-26AB-4C5C-BD3F-C47EEABE5BF4}</ProjectGuid>
+    <UserSecretsId>9415f1ba-26ab-4c5c-bd3f-c47eeabe5bf4</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Driver oficial do MongoDB -->
+    <PackageReference Include="MongoDB.Driver" Version="2.28.0" />
+
+    <!-- Leitura e escrita de Excel (.xlsx) -->
+    <PackageReference Include="ClosedXML" Version="0.104.1" />
+
+    <!-- Leitura de arquivos CSV -->
+    <PackageReference Include="CsvHelper" Version="33.0.1" />
+
+    <!-- Swagger / OpenAPI -->
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+</Project>

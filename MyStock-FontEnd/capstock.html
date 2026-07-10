@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>capStock — Inventário de TI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="mobile-topbar">
+  <button class="hamburger" id="btn-drawer" aria-label="Abrir menu">☰</button>
+  <div class="brand"><span class="mark">◍</span><h1>capStock</h1></div>
+  <div class="api-dot-wrap"><span class="dot" id="api-dot-mobile"></span></div>
+</div>
+<div class="drawer-backdrop" id="drawer-backdrop"></div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><span class="mark">◍</span><h1>MyStock</h1></div>
+
+    <div class="nav-group">
+      <p class="nav-label">Categorias</p>
+      <button class="chip-btn active" data-cat="">Todos os itens <span class="count" id="count-all">0</span></button>
+      <button class="chip-btn" data-cat="Computador">Computadores <span class="count" id="count-Computador">0</span></button>
+      <button class="chip-btn" data-cat="Impressora">Impressoras <span class="count" id="count-Impressora">0</span></button>
+      <button class="chip-btn" data-cat="ImpressoraTermica">Etiquetadoras <span class="count" id="count-ImpressoraTermica">0</span></button>
+      <button class="chip-btn" data-cat="MaterialEstoque">Estoque <span class="count" id="count-MaterialEstoque">0</span></button>
+    </div>
+
+    <div class="nav-group">
+      <p class="nav-label">Filtrar</p>
+      <div class="filters">
+        <input type="text" id="filter-unidade" placeholder="Unidade (ex: )">
+        <input type="text" id="filter-andar" placeholder="Andar (ex: 17º)">
+        <input type="text" id="filter-local" placeholder="Local (ex: Posto )">
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="api-status"><span class="dot" id="api-dot"></span><span id="api-status-text">verificando conexão…</span></div>
+      <button class="link-btn" id="btn-logs">ver histórico de atividade</button>
+      <button class="link-btn" id="btn-config">configurar endpoint da api</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div>
+        <h2>Inventário de TI</h2>
+        <p class="sub">Computadores, impressoras, etiquetadoras e estoque — tudo em um lugar.</p>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btn-export-xlsx">Exportar .xlsx</button>
+        <button class="btn" id="btn-export-csv">Exportar .csv</button>
+        <button class="btn" id="btn-import">Importar planilha</button>
+        <button class="btn btn-signal" id="btn-new">+ Novo item</button>
+      </div>
+    </div>
+
+    <div class="search-row">
+      <input type="text" id="search" placeholder="Buscar por host, IP, serial, patrimônio, modelo…">
+      <span class="pill-count" id="result-count">0 itens</span>
+    </div>
+
+    <div class="table-wrap">
+      <div id="table-region"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ---------- modal: criar / editar item ---------- -->
+<div class="overlay" id="overlay-item">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="item-modal-title">Novo item</h3>
+      <button class="modal-close" data-close>&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="msg" id="item-msg"></div>
+
+      <div class="field">
+        <label>Categoria</label>
+        <select id="f-categoria">
+          <option value="Computador">Computador</option>
+          <option value="Notebook">Notebook</option>
+          <option value="Impressora">Impressora</option>
+          <option value="ImpressoraTermica">Impressora Térmica / Etiquetadora</option>
+          <option value="MaterialEstoque">Material de Estoque</option>
+        </select>
+      </div>
+
+      <div class="section-label">Unidade</div>
+      <div class="field"><label>Unidade</label><input id="f-unidade" placeholder="ex: Roma"></div>
+
+      <div class="section-label">Localização</div>
+      <div class="field-row">
+        <div class="field"><label>Andar</label><input id="f-andar" placeholder="ex: 17º"></div>
+        <div class="field"><label>Local</label><input id="f-local" placeholder="ex: Nutrição-ADM"></div>
+      </div>
+
+      <div id="fields-computador">
+        <div class="section-label">Computador</div>
+        <div class="field-row">
+          <div class="field"><label>Hostname</label><input id="c-hostname"></div>
+          <div class="field"><label>Marca</label><input id="c-marca"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Modelo</label><input id="c-modelo"></div>
+          <div class="field"><label>Patrimônio</label><input id="c-patrimonio"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Serial Number</label><input id="c-serial"></div>
+          <div class="field"><label>SSD/HD</label><input id="c-ssdhd"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Sistema Operacional</label><input id="c-so"></div>
+          <div class="field"><label>Memória RAM</label><input id="c-ram"></div>
+        </div>
+        <div class="field"><label>Processador</label><input id="c-processador"></div>
+        <div class="section-label">Monitor (opcional)</div>
+        <div class="field-row">
+          <div class="field"><label>Serial do monitor</label><input id="c-mon-sn"></div>
+          <div class="field"><label>Patrimônio do monitor</label><input id="c-mon-pat"></div>
+        </div>
+        <div class="field"><label>Modelo do monitor</label><input id="c-mon-modelo"></div>
+      </div>
+
+      <div id="fields-impressora">
+        <div class="section-label">Impressora</div>
+        <div class="field-row">
+          <div class="field"><label>Marca</label><input id="p-marca"></div>
+          <div class="field"><label>Modelo</label><input id="p-modelo"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>IP</label><input id="p-ip" placeholder="10.2.x.x"></div>
+          <div class="field"><label>Nº de série</label><input id="p-serial"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Ramal</label><input id="p-ramal"></div>
+          <div class="field"><label>Status</label><input id="p-status" placeholder="Funcional"></div>
+        </div>
+      </div>
+
+      <div id="fields-impressoratermica">
+        <div class="section-label">Impressora Térmica / Etiquetadora</div>
+        <div class="field-row">
+          <div class="field"><label>Marca</label><input id="t-marca"></div>
+          <div class="field"><label>Modelo</label><input id="t-modelo"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>IP / porta</label><input id="t-ip" placeholder="10.2.x.x ou USB"></div>
+          <div class="field"><label>Nº de série</label><input id="t-serial"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Uso</label><input id="t-uso" placeholder="Etiqueta Pacientes"></div>
+          <div class="field"><label>Status</label><input id="t-status" placeholder="Funcional"></div>
+        </div>
+      </div>
+
+      <div id="fields-materialestoque">
+        <div class="section-label">Material de Estoque</div>
+        <div class="field-row">
+          <div class="field"><label>Item</label><input id="m-item"></div>
+          <div class="field"><label>Quantidade</label><input id="m-qtd" type="number"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Status</label><input id="m-status" placeholder="Novo / Usado"></div>
+          <div class="field"><label>Marca</label><input id="m-marca"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close>Cancelar</button>
+      <button class="btn btn-signal" id="btn-save-item">Salvar item</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- modal: importar planilha ---------- -->
+<div class="overlay" id="overlay-import">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Importar planilha</h3>
+      <button class="modal-close" data-close>&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="msg" id="import-msg"></div>
+      <div class="dropzone" id="dropzone">
+        <div id="dropzone-label"><strong>Clique para escolher</strong> ou arraste o arquivo .xlsx ou .csv aqui</div>
+        <input type="file" id="file-input" accept=".xlsx,.csv" style="display:none">
+      </div>
+
+      <div class="field" id="unidade-field" style="display:none;margin-top:14px;">
+        <label>Unidade deste arquivo</label>
+        <input id="import-unidade" placeholder="ex: Roma">
+        <p class="muted" style="font-size:12px;margin:6px 0 0;line-height:1.5;">
+          Detectada automaticamente pelo nome do arquivo. <strong>Atenção:</strong> importar
+          substitui todos os itens que já existiam dessa unidade pelo conteúdo atual do
+          arquivo — se você editou ou excluiu linhas, essa mudança será refletida aqui também.
+        </p>
+      </div>
+
+      <div class="field" id="csv-categoria-field" style="display:none;margin-top:14px;">
+        <label>Categoria padrão deste arquivo CSV</label>
+        <select id="csv-categoria">
+          <option value="">— usar coluna "Categoria" do próprio CSV —</option>
+          <option value="Computador">Computador</option>
+          <option value="Notebook">Notebook</option>
+          <option value="Impressora">Impressora</option>
+          <option value="ImpressoraTermica">Impressora Térmica / Etiquetadora</option>
+          <option value="MaterialEstoque">Material de Estoque</option>
+        </select>
+        <p class="muted" style="font-size:12px;margin:6px 0 0;line-height:1.5;">
+          CSV não tem abas como o Excel, então todas as linhas do arquivo usam essa
+          categoria — a não ser que o próprio CSV já tenha uma coluna <span class="mono">Categoria</span>
+          preenchida linha a linha (nesse caso ela sempre tem prioridade).
+        </p>
+      </div>
+      <div class="import-summary" id="import-summary"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close>Fechar</button>
+      <button class="btn btn-signal" id="btn-do-import" disabled>Importar arquivo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- modal: configurar endpoint ---------- -->
+<div class="overlay" id="overlay-config">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Endpoint da API</h3>
+      <button class="modal-close" data-close>&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>URL base (sem barra no final)</label>
+        <input id="api-base-input" placeholder="https://localhost:44340">
+      </div>
+      <p class="muted" style="font-size:12.5px;line-height:1.5;">
+        Ex: <span class="mono">https://localhost:44340</span> ou <span class="mono">http://localhost:5240</span> —
+        confira a porta no perfil que o Visual Studio usou pra rodar (aparece no console ao dar F5).
+        Se o navegador bloquear por certificado autoassinado, abra a URL da API direto numa aba
+        e aceite o aviso de segurança uma vez.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close>Cancelar</button>
+      <button class="btn btn-signal" id="btn-save-config">Salvar e reconectar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- modal: histórico de atividade ---------- -->
+<div class="overlay" id="overlay-logs">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-header">
+      <h3>Histórico de atividade</h3>
+      <button class="modal-close" data-close>&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row" style="margin-bottom:14px;">
+        <div class="field"><label>Unidade</label><input id="logs-filter-unidade" placeholder="ex: Roma"></div>
+        <div class="field">
+          <label>Ação</label>
+          <select id="logs-filter-acao">
+            <option value="">Todas</option>
+            <option value="Criar">Criar</option>
+            <option value="Atualizar">Atualizar</option>
+            <option value="Excluir">Excluir</option>
+            <option value="ImportarCsv">Importar CSV</option>
+            <option value="ImportarExcel">Importar Excel</option>
+          </select>
+        </div>
+      </div>
+      <div id="logs-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="btn-logs-refresh">Atualizar</button>
+      <button class="btn" data-close>Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
