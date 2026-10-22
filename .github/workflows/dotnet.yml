@@ -1,0 +1,22 @@
+name: build e testes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restaurar pacotes
+        run: dotnet restore InventoryApiSolution/InventoryApi.sln
+      - name: Compilar
+        run: dotnet build InventoryApiSolution/InventoryApi.sln --no-restore --configuration Release
+      - name: Rodar os testes
+        run: dotnet test InventoryApiSolution/InventoryApi.sln --no-build --configuration Release --logger "trx" --logger "console;verbosity=normal"

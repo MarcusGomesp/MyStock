@@ -1,5 +1,7 @@
 # 📊 MyStock — Inventário de TI
 
+[![build e testes](https://github.com/MarcusGomesp/MyStock/actions/workflows/dotnet.yml/badge.svg)](https://github.com/MarcusGomesp/MyStock/actions/workflows/dotnet.yml)
+
 De planilha bagunçada a um sistema de verdade.
 
 API integrada a um painel web para **gerenciamento de ativos de TI** (computadores, impressoras, etiquetadoras e estoque) — pensada para substituir o controle manual em planilhas por algo organizado, confiável e acessível de qualquer lugar.
@@ -22,6 +24,8 @@ Controle de inventário de TI feito em planilha tende a virar bagunça rápido: 
 
 - **C#** / **ASP.NET Core** — API REST
 - **Swagger / OpenAPI 3.0** — documentação interativa dos endpoints
+- **MongoDB** para persistência, **ClosedXML** e **CsvHelper** para planilhas
+- **xUnit** para testes unitários, rodando a cada push no **GitHub Actions**
 - Painel web para gestão visual do inventário
 
 ## Endpoints da API
@@ -49,6 +53,22 @@ Controle de inventário de TI feito em planilha tende a virar bagunça rápido: 
 
 **Documentação interativa dos endpoints (Swagger)**
 ![Swagger](03-swagger-endpoints.png)
+
+## Testes
+
+O projeto `InventoryApi.Tests` cobre as regras que mais importam na importação de planilhas:
+
+- reconhecimento de colunas mesmo com acento, maiúscula ou apelido diferente (`Memória RAM`, `RAM`, `memoria  ram`);
+- extração da unidade a partir do nome do arquivo (`Unidade Roma.csv` → `Roma`);
+- montagem do item certo para cada categoria (computador, impressora, etiquetadora, estoque);
+- reimportação **sem duplicar** registros e sem apagar os dados da unidade quando o arquivo vem vazio ou inválido;
+- detecção da linha de título antes do cabeçalho e avisos para linhas ignoradas.
+
+O banco é substituído por implementações em memória das interfaces (`IInventoryService`, `IActivityLogService`), então os testes rodam sem MongoDB:
+
+```bash
+dotnet test InventoryApiSolution/InventoryApi.sln
+```
 
 ## Aprendizados
 
